@@ -1,15 +1,17 @@
 import { ReactNode, FC } from "react";
-import { Box } from "@chakra-ui/react";
+import { Container, Flex } from "@chakra-ui/react";
 
 type LayoutProps = {
-  children: ReactNode,
+  children: ReactNode;
 };
 
 const Layout: FC<LayoutProps> = ({ children }) => {
   return (
-    <Box display="flex" flexDirection="column" minHeight="100vh" bg="gray.100">
-      {children}
-    </Box>
+    <Flex flexDirection="column" minHeight="100vh" bg="gray.50">
+      <Container maxW="container.xl" p={8}>
+        {children}
+      </Container>
+    </Flex>
   );
 };
 
