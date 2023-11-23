@@ -1,9 +1,10 @@
 import { FC, useState } from "react";
-import { getUsers } from "../queries/useUser";
+import { getUsers } from "../queries/getUsers";
 import {
   Avatar,
   Card,
   HStack,
+  IconButton,
   Table,
   TableContainer,
   Tbody,
@@ -16,12 +17,24 @@ import {
 } from "@chakra-ui/react";
 import Pagination from "./Pagination";
 import TableSkeleton from "./TableSkeleton";
+import { MdDeleteOutline } from "react-icons/md";
+import { useDeleteUser } from "../mutions/useDeleteUser";
+import { QueryClient } from "@tanstack/react-query";
 
 const UsersTable: FC = () => {
-  const [queryProps, setQueryProps] = useState({ page: 1, limit: 10 });
-  const { data: users, isLoading, error } = getUsers(queryProps);
+  const [queryProps, setQueryProps] = useState({ page: 0, limit: 10 });
+  const { data: users, isLoading } = getUsers(queryProps);
+  const { mutate: deleteUser } = useDeleteUser({
+    onSuccess: () => {
+      debugger;
+      const queryClient = new QueryClient();
+      queryClient.invalidateQueries();
+    },
+  });
 
-  console.log(users);
+  const handleDelete = (id: string) => {
+    deleteUser(id);
+  };
 
   const changePageHandler = (page: number) => {
     setQueryProps((prev) => ({ ...prev, page }));
@@ -36,10 +49,11 @@ const UsersTable: FC = () => {
               <Th>Name</Th>
               <Th>Email</Th>
               <Th>Phone Number</Th>
+              <Th>Actions</Th>
             </Tr>
           </Thead>
           {isLoading ? (
-            <TableSkeleton colSpan={3} />
+            <TableSkeleton colSpan={4} />
           ) : (
             <Tbody>
               {users?.data.map((user: User) => (
@@ -56,13 +70,25 @@ const UsersTable: FC = () => {
                   </Td>
                   <Td>{user.email}</Td>
                   <Td>{user.phoneNumber}</Td>
+                  <Td>
+                    <IconButton
+                      size="sm"
+                      bg="red.500"
+                      color="white"
+                      _hover={{ bg: "red.600" }}
+                      borderRadius="full"
+                      aria-label="Delete user"
+                      icon={<MdDeleteOutline />}
+                      onClick={() => handleDelete(user.id)}
+                    />
+                  </Td>
                 </Tr>
               ))}
             </Tbody>
           )}
           <Tfoot>
             <Tr>
-              <Th colSpan={3} textAlign="center">
+              <Th colSpan={4} textAlign="center">
                 {users?.data && (
                   <Pagination
                     totalResults={users?.total}

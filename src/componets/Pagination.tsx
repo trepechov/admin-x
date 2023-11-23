@@ -1,33 +1,33 @@
-import React from "react";
+import { FC } from "react";
 import { Button, ButtonGroup } from "@chakra-ui/react";
 
-interface PaginationProps {
+type PaginationProps = {
   currentPage: number;
   totalResults: number;
   resultsLimit: number;
   changePageHandler: (page: number) => void;
-}
+};
 
-const Pagination: React.FC<PaginationProps> = ({
+const Pagination: FC<PaginationProps> = ({
   currentPage,
   totalResults,
   resultsLimit,
   changePageHandler,
 }) => {
   const totalPages = Math.ceil(totalResults / resultsLimit);
+  console.log(totalResults, totalPages, resultsLimit);
   return (
     <ButtonGroup size="sm" variant="outline">
       {Array(totalPages)
         .fill("")
         .map((_, index) => {
-          const pageNumber = index + 1;
           return (
             <Button
               key={index}
-              variant={currentPage === pageNumber ? "solid" : "outline"}
-              onClick={() => changePageHandler(pageNumber)}
+              variant={currentPage === index ? "solid" : "outline"}
+              onClick={() => changePageHandler(index)}
             >
-              {pageNumber}
+              {index + 1}
             </Button>
           );
         })}
