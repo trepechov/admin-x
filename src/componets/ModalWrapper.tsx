@@ -7,14 +7,14 @@ import {
   ModalOverlay,
 } from "@chakra-ui/react";
 
-type UserModalProps = {
+type ModalWrapperProps = {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
 };
 
-const ModalWrapper: FC<UserModalProps> = ({
+const ModalWrapper: FC<ModalWrapperProps> = ({
   isOpen,
   onClose,
   title,

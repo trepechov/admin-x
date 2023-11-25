@@ -24,7 +24,6 @@ export const createUser = async (data: Partial<User>) => {
 
     return response.data;
   } catch (error: any) {
-    console.log();
     throw new Error(error.response.data.error);
   }
 };

@@ -12,12 +12,12 @@ import { useCreateUser } from "../mutions/useCreateUser";
 import ModalWrapper from "./ModalWrapper";
 import { QueryClient } from "@tanstack/react-query";
 
-type UserModalProps = {
+type ModalUserProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
-const UserModal: FC<UserModalProps> = ({ isOpen, onClose }) => {
+const ModalUser: FC<ModalUserProps> = ({ isOpen, onClose }) => {
   const [error, setError] = useState("");
   const [userData, setUserData] = useState({
     title: "",
@@ -33,9 +33,9 @@ const UserModal: FC<UserModalProps> = ({ isOpen, onClose }) => {
       setError(error.message);
     },
     onSuccess: () => {
-      debugger;
+      // debugger;
       const queryClient = new QueryClient();
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       onClose();
     },
   });
@@ -91,7 +91,7 @@ const UserModal: FC<UserModalProps> = ({ isOpen, onClose }) => {
         </ModalBody>
 
         <ModalFooter>
-          <Button type="submit" colorScheme="blue" mr={3}>
+          <Button type="submit" colorScheme="green" mr={3}>
             Save
           </Button>
           <Button onClick={onClose}>Cancel</Button>
@@ -101,4 +101,4 @@ const UserModal: FC<UserModalProps> = ({ isOpen, onClose }) => {
   );
 };
 
-export default UserModal;
+export default ModalUser;

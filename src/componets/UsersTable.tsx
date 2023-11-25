@@ -1,10 +1,10 @@
-import { FC, useState } from "react";
-import { getUsers } from "../queries/getUsers";
 import {
   Avatar,
   Card,
+  Flex,
   HStack,
   IconButton,
+  Input,
   Table,
   TableContainer,
   Tbody,
@@ -14,26 +14,50 @@ import {
   Th,
   Thead,
   Tr,
+  useDisclosure,
 } from "@chakra-ui/react";
+import { FC, useState } from "react";
+import { MdDeleteOutline } from "react-icons/md";
+import { getUsers } from "../queries/getUsers";
+import ModalConfirm from "./ModalConfirm";
 import Pagination from "./Pagination";
 import TableSkeleton from "./TableSkeleton";
-import { MdDeleteOutline } from "react-icons/md";
-import { useDeleteUser } from "../mutions/useDeleteUser";
-import { QueryClient } from "@tanstack/react-query";
+
+import { Box, Button } from "@chakra-ui/react";
+import { FaUserPlus } from "react-icons/fa";
+import ModalUser from "./ModalUser";
+// import ModalUser from "./componets/ModalUser";
 
 const UsersTable: FC = () => {
   const [queryProps, setQueryProps] = useState({ page: 0, limit: 10 });
-  const { data: users, isLoading } = getUsers(queryProps);
-  const { mutate: deleteUser } = useDeleteUser({
-    onSuccess: () => {
-      debugger;
-      const queryClient = new QueryClient();
-      queryClient.invalidateQueries();
-    },
-  });
 
-  const handleDelete = (id: string) => {
-    deleteUser(id);
+  const {
+    isOpen: isDeleteOpen,
+    onOpen: onDeleteOpen,
+    onClose: onDeleteClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: isUserOpen,
+    onOpen: onUserOpen,
+    onClose: onUserClose,
+  } = useDisclosure();
+  // const { isUserOpen, onUserOpen, onUserClose } = useDisclosure();
+
+  const { data: users, isLoading } = getUsers(queryProps);
+  // const { mutate: deleteUser } = useDeleteUser({
+  //   onSuccess: () => {
+  //     debugger;
+  //     const queryClient = new QueryClient();
+  //     queryClient.invalidateQueries();
+  //   },
+  // });\
+
+  const [deleteUser, setDeleteUser] = useState({ id: "", fullName: "" });
+
+  const handleDelete = (id: string, fullName: string) => {
+    setDeleteUser({ id, fullName });
+    onDeleteOpen();
   };
 
   const changePageHandler = (page: number) => {
@@ -42,6 +66,17 @@ const UsersTable: FC = () => {
 
   return (
     <Card p="4">
+      <Flex mb={2} justifyContent="space-between">
+        <Input width="xl" placeholder="Search" />
+        <Button
+          variant="solid"
+          colorScheme="green"
+          onClick={onUserOpen}
+          leftIcon={<FaUserPlus />}
+        >
+          Create user
+        </Button>
+      </Flex>
       <TableContainer>
         <Table variant="striped" colorScheme="gray">
           <Thead>
@@ -79,7 +114,7 @@ const UsersTable: FC = () => {
                       borderRadius="full"
                       aria-label="Delete user"
                       icon={<MdDeleteOutline />}
-                      onClick={() => handleDelete(user.id)}
+                      onClick={() => handleDelete(user.id, user.fullName)}
                     />
                   </Td>
                 </Tr>
@@ -102,6 +137,12 @@ const UsersTable: FC = () => {
           </Tfoot>
         </Table>
       </TableContainer>
+      <ModalConfirm
+        isOpen={isDeleteOpen}
+        onClose={onDeleteClose}
+        user={deleteUser}
+      />
+      <ModalUser isOpen={isUserOpen} onClose={onUserClose} />
     </Card>
   );
 };

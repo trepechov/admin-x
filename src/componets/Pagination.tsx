@@ -15,7 +15,6 @@ const Pagination: FC<PaginationProps> = ({
   changePageHandler,
 }) => {
   const totalPages = Math.ceil(totalResults / resultsLimit);
-  console.log(totalResults, totalPages, resultsLimit);
   return (
     <ButtonGroup size="sm" variant="outline">
       {Array(totalPages)
