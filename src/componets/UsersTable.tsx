@@ -3,8 +3,11 @@ import {
   Card,
   Flex,
   HStack,
+  Icon,
   IconButton,
   Input,
+  InputGroup,
+  InputLeftElement,
   Table,
   TableContainer,
   Tbody,
@@ -22,11 +25,10 @@ import { getUsers } from "../queries/getUsers";
 import ModalConfirm from "./ModalConfirm";
 import Pagination from "./Pagination";
 import TableSkeleton from "./TableSkeleton";
-
-import { Box, Button } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
 import { FaUserPlus } from "react-icons/fa";
+import { GoSearch } from "react-icons/go";
 import ModalUser from "./ModalUser";
-// import ModalUser from "./componets/ModalUser";
 
 const UsersTable: FC = () => {
   const [queryProps, setQueryProps] = useState({ page: 0, limit: 10 });
@@ -42,7 +44,6 @@ const UsersTable: FC = () => {
     onOpen: onUserOpen,
     onClose: onUserClose,
   } = useDisclosure();
-  // const { isUserOpen, onUserOpen, onUserClose } = useDisclosure();
 
   const { data: users, isLoading } = getUsers(queryProps);
   // const { mutate: deleteUser } = useDeleteUser({
@@ -51,7 +52,7 @@ const UsersTable: FC = () => {
   //     const queryClient = new QueryClient();
   //     queryClient.invalidateQueries();
   //   },
-  // });\
+  // });
 
   const [deleteUser, setDeleteUser] = useState({ id: "", fullName: "" });
 
@@ -67,7 +68,12 @@ const UsersTable: FC = () => {
   return (
     <Card p="4">
       <Flex mb={2} justifyContent="space-between">
-        <Input width="xl" placeholder="Search" />
+        <InputGroup w="sm">
+          <InputLeftElement pointerEvents="none">
+            <Icon as={GoSearch} color="gray.300" />
+          </InputLeftElement>
+          <Input type="tel" placeholder="Search" />
+        </InputGroup>
         <Button
           variant="solid"
           colorScheme="green"

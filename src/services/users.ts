@@ -10,22 +10,19 @@ export const getUsersService = async (params: PaginationOptions) => {
       contentType: "application/json",
     },
   });
+
   return response.data;
 };
 
 export const createUser = async (data: Partial<User>) => {
-  try {
-    const response = await axios.post(`${API_URL}/user/create/`, data, {
-      headers: {
-        "app-id": API_KEY,
-        contentType: "application/json",
-      },
-    });
+  const response = await axios.post(`${API_URL}/user/create/`, data, {
+    headers: {
+      "app-id": API_KEY,
+      contentType: "application/json",
+    },
+  });
 
-    return response.data;
-  } catch (error: any) {
-    throw new Error(error.response.data.error);
-  }
+  return response.data;
 };
 
 export const deleteUser = async (userId: string) => {
@@ -35,5 +32,6 @@ export const deleteUser = async (userId: string) => {
       contentType: "application/json",
     },
   });
+
   return response.data;
 };

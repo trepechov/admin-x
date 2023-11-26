@@ -1,16 +1,17 @@
 import { FC, useState } from "react";
-import {
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  ModalBody,
-  ModalFooter,
-  Text,
-} from "@chakra-ui/react";
+import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { useCreateUser } from "../mutions/useCreateUser";
 import ModalWrapper from "./ModalWrapper";
-import { QueryClient } from "@tanstack/react-query";
+import {
+  Alert,
+  Button,
+  Icon,
+  ModalBody,
+  ModalFooter,
+  VStack,
+} from "@chakra-ui/react";
+import { RiAlertFill } from "react-icons/ri";
+import FormControlInput from "./FormControlnput";
 
 type ModalUserProps = {
   isOpen: boolean;
@@ -18,83 +19,109 @@ type ModalUserProps = {
 };
 
 const ModalUser: FC<ModalUserProps> = ({ isOpen, onClose }) => {
-  const [error, setError] = useState("");
-  const [userData, setUserData] = useState({
-    title: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-  });
+  const [formError, setFormError] = useState("");
+  const {
+    register,
+    handleSubmit,
+    setError,
+    reset,
+    formState: { errors },
+  } = useForm();
 
   const { mutate: createUser } = useCreateUser({
     onError: (error: any) => {
-      console.log("error", error);
-      setError(error.message);
+      if (error.response.data.data) {
+        Object.keys(error.response.data.data).forEach((key: string) => {
+          setError(key, {
+            type: "manual",
+            message: error.response.data.data[key],
+          });
+        });
+      } else {
+        setFormError("Some error occured");
+      }
     },
     onSuccess: () => {
       // debugger;
-      const queryClient = new QueryClient();
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+      // const queryClient = new QueryClient();
+      // queryClient.invalidateQueries({ queryKey: ["users"] });
+      reset();
       onClose();
     },
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-
-    setUserData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-    createUser(userData);
+  const handleClose = () => {
+    reset();
+    onClose();
   };
 
   return (
-    <ModalWrapper isOpen={isOpen} onClose={onClose} title="Create User">
-      <form onSubmit={handleSubmit}>
+    <ModalWrapper isOpen={isOpen} onClose={handleClose} title="Create User">
+      <form onSubmit={handleSubmit(createUser as SubmitHandler<FieldValues>)}>
         <ModalBody pb={6}>
-          {error && <Text color="red.500">{error}</Text>}
-          <FormControl>
-            <FormLabel>First name</FormLabel>
-            <Input
+          <VStack spacing={4}>
+            {formError && (
+              <Alert status="error" rounded="md">
+                <Icon as={RiAlertFill} boxSize={6} mr={2} color="red.600" />
+                {formError}
+              </Alert>
+            )}
+
+            <FormControlInput
               name="firstName"
-              placeholder="First name"
-              onChange={handleChange}
+              label="First name"
+              errors={errors}
+              register={register}
+              validation={{
+                required: { value: true, message: "Enter first name" },
+              }}
             />
-          </FormControl>
 
-          <FormControl mt={4}>
-            <FormLabel>Last name</FormLabel>
-            <Input
+            <FormControlInput
               name="lastName"
-              placeholder="Last name"
-              onChange={handleChange}
+              label="Last name"
+              errors={errors}
+              register={register}
+              validation={{
+                required: { value: true, message: "Enter last name" },
+              }}
             />
-          </FormControl>
-          <FormControl>
-            <FormLabel>title</FormLabel>
-            <Input name="title" placeholder="Title" onChange={handleChange} />
-          </FormControl>
 
-          <FormControl mt={4}>
-            <FormLabel>Email</FormLabel>
-            <Input name="email" placeholder="Email" onChange={handleChange} />
-          </FormControl>
+            <FormControlInput
+              name="email"
+              label="Email"
+              errors={errors}
+              register={register}
+              validation={{
+                required: { value: true, message: "Enter email" },
+                pattern: {
+                  value: /^\S+@\S+\.\S+$/,
+                  message: "Enter valid email address",
+                },
+              }}
+            />
 
-          <FormControl mt={4}>
-            <FormLabel>Phone</FormLabel>
-            <Input name="phone" placeholder="Phone" onChange={handleChange} />
-          </FormControl>
+            <FormControlInput
+              name="phone"
+              label="Phone"
+              errors={errors}
+              register={register}
+              validation={{
+                required: { value: true, message: "Enter phone" },
+                pattern: {
+                  value: /^[\d\-\s]{8,12}$/,
+                  message: "Enter valid phone number",
+                },
+              }}
+            />
+          </VStack>
         </ModalBody>
 
         <ModalFooter>
           <Button type="submit" colorScheme="green" mr={3}>
             Save
           </Button>
-          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={handleClose}>Cancel</Button>
         </ModalFooter>
       </form>
     </ModalWrapper>
