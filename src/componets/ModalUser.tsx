@@ -9,6 +9,7 @@ import {
   ModalBody,
   ModalFooter,
   VStack,
+  useToast,
 } from "@chakra-ui/react";
 import { RiAlertFill } from "react-icons/ri";
 import FormControlInput from "./FormControlnput";
@@ -31,6 +32,8 @@ const ModalUser: FC<ModalUserProps> = ({ isOpen, onClose }) => {
 
   const queryClient = useQueryClient();
 
+  const toast = useToast();
+
   const { mutate: createUser } = useCreateUser({
     onError: (error: any) => {
       if (error.response.data.data) {
@@ -44,12 +47,19 @@ const ModalUser: FC<ModalUserProps> = ({ isOpen, onClose }) => {
         setFormError("Some error occured");
       }
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({
         queryKey: ["usersList"],
       });
       reset();
       onClose();
+      toast({
+        title: "User created.",
+        description: `We've created ${data.firstName} ${data.lastName}`,
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
     },
   });
 
@@ -106,11 +116,11 @@ const ModalUser: FC<ModalUserProps> = ({ isOpen, onClose }) => {
 
             <FormControlInput
               name="phone"
-              label="Phone"
+              label="Phone Number"
               errors={errors}
               register={register}
               validation={{
-                required: { value: true, message: "Enter phone" },
+                required: { value: true, message: "Enter phone number" },
                 pattern: {
                   value: /^[\d\-\s]{8,12}$/,
                   message: "Enter valid phone number",
@@ -121,7 +131,7 @@ const ModalUser: FC<ModalUserProps> = ({ isOpen, onClose }) => {
         </ModalBody>
 
         <ModalFooter>
-          <Button type="submit" colorScheme="green" mr={3}>
+          <Button type="submit" colorScheme="green" mr={2}>
             Save
           </Button>
           <Button onClick={handleClose}>Cancel</Button>

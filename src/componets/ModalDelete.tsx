@@ -9,24 +9,34 @@ import {
   ModalBody,
   ModalFooter,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { RiAlertFill } from "react-icons/ri";
 
-type ModalConfirmProps = {
+type ModalDeleteProps = {
   isOpen: boolean;
   onClose: () => void;
   user: { id: string; fullName: string };
 };
 
-const ModalConfirm: FC<ModalConfirmProps> = ({ isOpen, onClose, user }) => {
+const ModalDelete: FC<ModalDeleteProps> = ({ isOpen, onClose, user }) => {
   const [error, setError] = useState("");
   const queryClient = useQueryClient();
+
+  const toast = useToast();
 
   const { mutate: deleteUser } = useDeleteUser({
     onSuccess: () => {
       setError("");
       queryClient.invalidateQueries({ queryKey: ["usersList"] });
       onClose();
+      toast({
+        title: "User deleted",
+        description: "User was deleted successfully",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     },
     onError: (error: any) => {
       if (error.response.data.error === "RESOURCE_NOT_FOUND") {
@@ -72,4 +82,4 @@ const ModalConfirm: FC<ModalConfirmProps> = ({ isOpen, onClose, user }) => {
   );
 };
 
-export default ModalConfirm;
+export default ModalDelete;

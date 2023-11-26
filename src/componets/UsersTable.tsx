@@ -22,7 +22,7 @@ import {
 import { FC, useState } from "react";
 import { MdDeleteOutline } from "react-icons/md";
 import { getUsers } from "../queries/getUsers";
-import ModalConfirm from "./ModalConfirm";
+import ModalDelete from "./ModalDelete";
 import Pagination from "./Pagination";
 import TableSkeleton from "./TableSkeleton";
 import { Button } from "@chakra-ui/react";
@@ -32,6 +32,7 @@ import ModalUser from "./ModalUser";
 
 const UsersTable: FC = () => {
   const [queryParams, setQueryParams] = useState({ page: 0, limit: 10 });
+  const [searchQuery, setSearchQuery] = useState("");
 
   const {
     isOpen: isDeleteOpen,
@@ -65,6 +66,10 @@ const UsersTable: FC = () => {
     setQueryParams((prev) => ({ ...prev, page }));
   };
 
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
   return (
     <Card p="4">
       <Flex mb={2} justifyContent="space-between">
@@ -72,7 +77,7 @@ const UsersTable: FC = () => {
           <InputLeftElement pointerEvents="none">
             <Icon as={GoSearch} color="gray.300" />
           </InputLeftElement>
-          <Input type="text" placeholder="Search" />
+          <Input type="text" placeholder="Filter" onChange={handleSearch} />
         </InputGroup>
         <Button
           variant="solid"
@@ -97,34 +102,42 @@ const UsersTable: FC = () => {
             <TableSkeleton colSpan={4} />
           ) : (
             <Tbody>
-              {users?.data.map((user: User) => (
-                <Tr key={user.id}>
-                  <Td>
-                    <HStack>
-                      <Avatar
-                        shadow="md"
-                        name={user.fullName}
-                        src={user.picture}
+              {users?.data
+                .filter(
+                  (user: User) =>
+                    user.fullName
+                      .toLowerCase()
+                      .includes(searchQuery.toLowerCase()) ||
+                    user.phoneNumber.includes(searchQuery)
+                )
+                .map((user: User) => (
+                  <Tr key={user.id}>
+                    <Td>
+                      <HStack>
+                        <Avatar
+                          shadow="md"
+                          name={user.fullName}
+                          src={user.picture}
+                        />
+                        <Text>{user.fullName}</Text>
+                      </HStack>
+                    </Td>
+                    <Td>{user.email}</Td>
+                    <Td>{user.phoneNumber}</Td>
+                    <Td>
+                      <IconButton
+                        size="sm"
+                        bg="red.500"
+                        color="white"
+                        _hover={{ bg: "red.600" }}
+                        borderRadius="full"
+                        aria-label="Delete user"
+                        icon={<MdDeleteOutline />}
+                        onClick={() => handleDelete(user.id, user.fullName)}
                       />
-                      <Text>{user.fullName}</Text>
-                    </HStack>
-                  </Td>
-                  <Td>{user.email}</Td>
-                  <Td>{user.phoneNumber}</Td>
-                  <Td>
-                    <IconButton
-                      size="sm"
-                      bg="red.500"
-                      color="white"
-                      _hover={{ bg: "red.600" }}
-                      borderRadius="full"
-                      aria-label="Delete user"
-                      icon={<MdDeleteOutline />}
-                      onClick={() => handleDelete(user.id, user.fullName)}
-                    />
-                  </Td>
-                </Tr>
-              ))}
+                    </Td>
+                  </Tr>
+                ))}
             </Tbody>
           )}
           <Tfoot>
@@ -143,7 +156,7 @@ const UsersTable: FC = () => {
           </Tfoot>
         </Table>
       </TableContainer>
-      <ModalConfirm
+      <ModalDelete
         isOpen={isDeleteOpen}
         onClose={onDeleteClose}
         user={deleteUser}
