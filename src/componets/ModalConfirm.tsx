@@ -1,6 +1,6 @@
 import { FC, useState } from "react";
 import { useDeleteUser } from "../mutions/useDeleteUser";
-import { QueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import ModalWrapper from "./ModalWrapper";
 import {
   Alert,
@@ -20,13 +20,12 @@ type ModalConfirmProps = {
 
 const ModalConfirm: FC<ModalConfirmProps> = ({ isOpen, onClose, user }) => {
   const [error, setError] = useState("");
+  const queryClient = useQueryClient();
 
   const { mutate: deleteUser } = useDeleteUser({
     onSuccess: () => {
-      // debugger;
       setError("");
-      const queryClient = new QueryClient();
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({ queryKey: ["usersList"] });
       onClose();
     },
     onError: (error: any) => {

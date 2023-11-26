@@ -3,8 +3,8 @@ import { createUser } from "../services/users";
 
 export const useCreateUser = (options = {}) =>
   useMutation({
-    mutationFn: createUser,
     ...options,
+    mutationFn: createUser,
   });
 
 //TODO check optimiisttiic update

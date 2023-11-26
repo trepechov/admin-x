@@ -27,6 +27,7 @@ const FormControlInput: FC<FormControlInputProps> = ({
     <FormControl isInvalid={!!errors[name]} position="relative" pb={4}>
       <FormLabel>{label}</FormLabel>
       <Input
+        type="text"
         placeholder={placeholder}
         {...register(name, {
           ...validation,

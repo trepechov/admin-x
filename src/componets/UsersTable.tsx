@@ -31,7 +31,7 @@ import { GoSearch } from "react-icons/go";
 import ModalUser from "./ModalUser";
 
 const UsersTable: FC = () => {
-  const [queryProps, setQueryProps] = useState({ page: 0, limit: 10 });
+  const [queryParams, setQueryParams] = useState({ page: 0, limit: 10 });
 
   const {
     isOpen: isDeleteOpen,
@@ -45,15 +45,15 @@ const UsersTable: FC = () => {
     onClose: onUserClose,
   } = useDisclosure();
 
-  const { data: users, isLoading } = getUsers(queryProps);
-  // const { mutate: deleteUser } = useDeleteUser({
-  //   onSuccess: () => {
-  //     debugger;
-  //     const queryClient = new QueryClient();
-  //     queryClient.invalidateQueries();
-  //   },
-  // });
-
+  const { data: users, isLoading } = getUsers(queryParams, {
+    onSuccess: (data: UsersResponse) => {
+      //if result is empty array navigate the last possible page
+      //usualy when deleting the last user of the page
+      if (data.data.length === 0) {
+        setQueryParams((prev) => ({ ...prev, page: prev.page - 1 }));
+      }
+    },
+  });
   const [deleteUser, setDeleteUser] = useState({ id: "", fullName: "" });
 
   const handleDelete = (id: string, fullName: string) => {
@@ -62,7 +62,7 @@ const UsersTable: FC = () => {
   };
 
   const changePageHandler = (page: number) => {
-    setQueryProps((prev) => ({ ...prev, page }));
+    setQueryParams((prev) => ({ ...prev, page }));
   };
 
   return (
@@ -72,7 +72,7 @@ const UsersTable: FC = () => {
           <InputLeftElement pointerEvents="none">
             <Icon as={GoSearch} color="gray.300" />
           </InputLeftElement>
-          <Input type="tel" placeholder="Search" />
+          <Input type="text" placeholder="Search" />
         </InputGroup>
         <Button
           variant="solid"

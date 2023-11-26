@@ -1,18 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { mockUsers } from "../mocks";
 import { getUsersService } from "../services/users";
+import { mockUsers } from "../mocks";
 
-export const getUsers = (params: PaginationOptions) => {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["users", { ...params }],
+export const getUsers = (params: PaginationOptions, options = {}) =>
+  useQuery({
+    ...options,
+    queryKey: ["usersList", { ...params }],
     queryFn: () => getUsersService(params),
-    select: mockUsers,
-    staleTime: 1000 * 60, // 60 seconds
+    select: mockUsers, // Since the mock is missing some fields, we use ReactQuery select to generate them
   });
-
-  return {
-    data,
-    isLoading,
-    error,
-  };
-};

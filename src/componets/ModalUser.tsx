@@ -12,6 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { RiAlertFill } from "react-icons/ri";
 import FormControlInput from "./FormControlnput";
+import { useQueryClient } from "@tanstack/react-query";
 
 type ModalUserProps = {
   isOpen: boolean;
@@ -28,6 +29,8 @@ const ModalUser: FC<ModalUserProps> = ({ isOpen, onClose }) => {
     formState: { errors },
   } = useForm();
 
+  const queryClient = useQueryClient();
+
   const { mutate: createUser } = useCreateUser({
     onError: (error: any) => {
       if (error.response.data.data) {
@@ -42,9 +45,9 @@ const ModalUser: FC<ModalUserProps> = ({ isOpen, onClose }) => {
       }
     },
     onSuccess: () => {
-      // debugger;
-      // const queryClient = new QueryClient();
-      // queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({
+        queryKey: ["usersList"],
+      });
       reset();
       onClose();
     },
