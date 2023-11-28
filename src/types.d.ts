@@ -20,3 +20,9 @@ type PaginationOptions = {
   limit: number;
   page: number;
 };
+
+type QueryOptions = {
+  limit: number;
+  page: number;
+  q: string;
+};

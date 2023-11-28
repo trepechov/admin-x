@@ -31,8 +31,7 @@ import { GoSearch } from "react-icons/go";
 import ModalUser from "./ModalUser";
 
 const UsersTable: FC = () => {
-  const [queryParams, setQueryParams] = useState({ page: 0, limit: 10 });
-  const [searchQuery, setSearchQuery] = useState("");
+  const [queryParams, setQueryParams] = useState({ page: 0, limit: 10, q: "" });
 
   const {
     isOpen: isDeleteOpen,
@@ -46,15 +45,7 @@ const UsersTable: FC = () => {
     onClose: onUserClose,
   } = useDisclosure();
 
-  const { data: users, isLoading } = getUsers(queryParams, {
-    onSuccess: (data: UsersResponse) => {
-      //if result is empty array navigate the last possible page
-      //usualy when deleting the last user of the page
-      if (data.data.length === 0) {
-        setQueryParams((prev) => ({ ...prev, page: prev.page - 1 }));
-      }
-    },
-  });
+  const { data: users, isLoading } = getUsers(queryParams);
   const [deleteUser, setDeleteUser] = useState({ id: "", fullName: "" });
 
   const handleDelete = (id: string, fullName: string) => {
@@ -67,7 +58,7 @@ const UsersTable: FC = () => {
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    setQueryParams((prev) => ({ ...prev, q: e.target.value, page: 0 }));
   };
 
   return (
@@ -102,42 +93,34 @@ const UsersTable: FC = () => {
             <TableSkeleton colSpan={4} />
           ) : (
             <Tbody>
-              {users?.data
-                .filter(
-                  (user: User) =>
-                    user.fullName
-                      .toLowerCase()
-                      .includes(searchQuery.toLowerCase()) ||
-                    user.phoneNumber.includes(searchQuery)
-                )
-                .map((user: User) => (
-                  <Tr key={user.id}>
-                    <Td>
-                      <HStack>
-                        <Avatar
-                          shadow="md"
-                          name={user.fullName}
-                          src={user.picture}
-                        />
-                        <Text>{user.fullName}</Text>
-                      </HStack>
-                    </Td>
-                    <Td>{user.email}</Td>
-                    <Td>{user.phoneNumber}</Td>
-                    <Td>
-                      <IconButton
-                        size="sm"
-                        bg="red.500"
-                        color="white"
-                        _hover={{ bg: "red.600" }}
-                        borderRadius="full"
-                        aria-label="Delete user"
-                        icon={<MdDeleteOutline />}
-                        onClick={() => handleDelete(user.id, user.fullName)}
+              {users?.data.map((user: User) => (
+                <Tr key={user.id}>
+                  <Td>
+                    <HStack>
+                      <Avatar
+                        shadow="md"
+                        name={user.fullName}
+                        src={user.picture}
                       />
-                    </Td>
-                  </Tr>
-                ))}
+                      <Text>{user.fullName}</Text>
+                    </HStack>
+                  </Td>
+                  <Td>{user.email}</Td>
+                  <Td>{user.phoneNumber}</Td>
+                  <Td>
+                    <IconButton
+                      size="sm"
+                      bg="red.500"
+                      color="white"
+                      _hover={{ bg: "red.600" }}
+                      borderRadius="full"
+                      aria-label="Delete user"
+                      icon={<MdDeleteOutline />}
+                      onClick={() => handleDelete(user.id, user.fullName)}
+                    />
+                  </Td>
+                </Tr>
+              ))}
             </Tbody>
           )}
           <Tfoot>
@@ -145,9 +128,9 @@ const UsersTable: FC = () => {
               <Th colSpan={4} textAlign="center">
                 {users?.data && (
                   <Pagination
-                    totalResults={users?.total}
-                    currentPage={users.page}
-                    resultsLimit={users.limit}
+                    totalResults={users.total}
+                    currentPage={queryParams.page}
+                    resultsLimit={queryParams.limit}
                     changePageHandler={changePageHandler}
                   />
                 )}
